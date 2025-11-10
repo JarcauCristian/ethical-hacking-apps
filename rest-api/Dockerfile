@@ -15,4 +15,4 @@ RUN useradd -m nonInteractive && chown -R nonInteractive:nonInteractive /app
 USER nonInteractive
 
 # Default command
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "src/main.py"]

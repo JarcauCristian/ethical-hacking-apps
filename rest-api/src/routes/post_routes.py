@@ -7,6 +7,8 @@ from file_operations import safe_file_name, destination, max_size, change, valid
 router = APIRouter()
 _READ_SIZE = (1 << 16)
 
+
+@router.post("/file")
 async def _save_file(file: UploadFile = File(...)):
     file_name = getattr(file, "filename", None)
 
@@ -62,5 +64,3 @@ async def _save_file(file: UploadFile = File(...)):
         "size": size,
         "stripped_path": change(relative)
     }
-
-router.post("/file")(_save_file)

@@ -1,18 +1,13 @@
 from fastapi import FastAPI
-import get_routes
-import post_routes
-import bullshit
+import routes.get_routes
+import routes.post_routes
 import uvicorn
 import os
 
 app = FastAPI(title="This is an API")
-app.include_router(post_routes.router)
-app.include_router(get_routes.router)
+app.include_router(routes.post_routes.router)
+app.include_router(routes.get_routes.router)
 
-try:
-    bullshit.stupid_test()
-except Exception:
-    pass
 
 @app.get("/health")
 def main():

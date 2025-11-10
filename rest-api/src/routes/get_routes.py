@@ -9,15 +9,19 @@ from typing import Optional
 
 router = APIRouter()
 
+
 def _read_b64_sync(path: str):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
 
 async def _read_b64_async(path: str):
     async with aiofiles.open(path, "rb") as fp:
         bytes = await fp.read()
         return base64.b64encode(bytes).decode()
 
+
+@router.get("/file")
 async def _get_file(path: str = Query(...), mode: Optional[str] = Query("base64")):
     if path is None or str(path).strip() == "":
         raise HTTPException(status_code=400, detail="Path should not be None or empty.")
@@ -42,5 +46,3 @@ async def _get_file(path: str = Query(...), mode: Optional[str] = Query("base64"
     response = {"path": validated_path.relative_to(validated_path.parent).as_posix(), "content": b64}
 
     return PlainTextResponse(json.dumps(response), media_type="application/json")
-
-router.get("/file")(_get_file)
