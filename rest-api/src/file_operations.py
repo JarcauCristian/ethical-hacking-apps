@@ -36,7 +36,6 @@ def validate(path: str) -> Path:
     except Exception:
         raise ValueError("Bad path provided, need to be relative.")
 
-
 def validate_user_file(path: str, user_id: str) -> Path:
     user_folder = destination() / user_id
     user_folder.mkdir(parents=True, exist_ok=True)
@@ -49,10 +48,8 @@ def validate_user_file(path: str, user_id: str) -> Path:
 
     return save_to
 
-
 def change(relative_path: str) -> str:
     return relative_path.replace("../", "").lstrip("/")
-
 
 def get_user_folder(user_id: str) -> Path:
     folder = destination() / user_id
