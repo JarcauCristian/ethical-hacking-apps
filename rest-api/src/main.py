@@ -17,7 +17,10 @@ from state import limiter
 app = FastAPI(
     title="This is an API",
     description="API with JWT Bearer Token Authentication",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None
 )
 
 
