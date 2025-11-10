@@ -3,37 +3,26 @@ from fastapi import UploadFile, File, HTTPException, Request, Depends
 import aiofiles
 import time
 
-from file_operations import safe_file_name, destination, max_size, change, validate, validate_user_file, get_user_folder, get_user_quota_used
-from auth_routes import get_current_user_id
-from limiter_inst import limiter
+from file_operations import safe_file_name, max_size, change, validate_user_file, get_user_quota_used
+from authentication.jwt import get_current_user_id, user_key
+from state import limiter
 
 router = APIRouter()
 _READ_SIZE = (1 << 16)
 USER_MAX_QUOTA = 1 * 1024 ** 3
 
-def user_key(request: Request):
-    # Extract token from Authorization header for rate limiting
-    token = request.headers.get("Authorization", "")
-    if token.startswith("Bearer "):
-        token = token[7:]
-    try:
-        from auth_routes import get_user_id_from_token
-        user_id = get_user_id_from_token(token)
-        return f"user:{user_id}"
-    except:
-        return "anonymous"
 
 @router.post("/file")
 @limiter.limit("10/minute", key_func=user_key)
 async def _save_file(
     request: Request, 
     file: UploadFile = File(..., description="File to upload"),
-    user_id: str = Depends(get_current_user_id)
+    user_id: str = Depends(get_current_user_id),
 ):
-    file_name = getattr(file, "filename", None)
+    file_name: str | None = getattr(file, "filename", None)
 
     try:
-        safe = safe_file_name(file_name)
+        safe = safe_file_name(file_name if file_name else "")
     except Exception as ex:
         raise HTTPException(status_code=400, detail=ex)
 
