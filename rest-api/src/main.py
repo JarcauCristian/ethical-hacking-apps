@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Request
 from fastapi.security import HTTPBearer
-
-import uvicorn
-import os
+from fastapi.middleware.cors import CORSMiddleware
 from slowapi.middleware import SlowAPIMiddleware
+import uvicorn
+
+import os
 
 import routes.auth
 import routes.post
 import routes.get
+from middlewares.logging import RequestLoggerMiddleware
+from middlewares.headers import SecurityHeadersMiddleware
 from database import init_db
 from state import limiter
 
@@ -30,10 +33,20 @@ def shutdown_event():
 
 
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["ethapp.sedimark.work"], 
+    allow_credentials=True, 
+    allow_methods=["GET", "POST"], 
+    allow_headers=["*"], 
+)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestLoggerMiddleware)
 
 app.include_router(routes.get.router)
 app.include_router(routes.post.router)
 app.include_router(routes.auth.router, prefix="/auth",tags=["auth"])
+
 
 @app.get("/health")
 def main():
