@@ -2,7 +2,7 @@ from fastapi.routing import APIRouter
 from fastapi import UploadFile, File, HTTPException
 import aiofiles
 import time
-from file_operations import safe_file_name, destination, max_size, change, validate
+from file_operations import safe_file_name, destination, max_size, change, validate, check_extension
 
 router = APIRouter()
 _READ_SIZE = (1 << 16)
@@ -12,6 +12,7 @@ async def _save_file(file: UploadFile = File(...)):
 
     try:
         safe = safe_file_name(file_name)
+        check_extension(safe)
     except Exception as ex:
         raise HTTPException(status_code=400, detail=ex)
 

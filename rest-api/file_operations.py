@@ -2,12 +2,19 @@ from pathlib import Path
 import re
 import time
 
+ALLOWED_EXTENSIONS = {".txt", ".jpg", ".jpeg", ".png", ".pdf"}
+
 _CURRENT_SCRIPT_FOLDER = Path(__file__).parent.resolve()
 _UPLOAD_FOLDER = (_CURRENT_SCRIPT_FOLDER / "uploads").resolve()
 _UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 _MAX_SIZE = (1 << 20) * 10
 _RX = re.compile(r"[^A-Za-z0-9_.-]")
+
+def check_extension(path: str):
+    ext = Path(path).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise ValueError(f"Extension {ext} not allowed.")
 
 def safe_file_name(path: str) -> str:
     try:
