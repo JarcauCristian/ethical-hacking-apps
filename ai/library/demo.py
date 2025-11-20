@@ -15,7 +15,8 @@ lib.matmul.restype = None
 lib.relu_inplace.argtypes = [ct.POINTER(ct.c_double), ct.c_size_t]
 lib.relu_inplace.restype = None
 
-lib.softmax_to_fixedbuf.argtypes = [ct.POINTER(ct.c_double), ct.c_size_t, ct.c_char_p]
+# updated signature: out buffer and its capacity
+lib.softmax_to_fixedbuf.argtypes = [ct.POINTER(ct.c_double), ct.c_size_t, ct.c_char_p, ct.c_size_t]
 lib.softmax_to_fixedbuf.restype = None
 
 lib.save_model_raw.argtypes = [ct.c_char_p, ct.POINTER(ct.c_double), ct.c_int]
@@ -33,6 +34,12 @@ lib.alloc_weights.restype = ct.POINTER(ct.c_double)
 lib.copy_weights.argtypes = [ct.c_int, ct.POINTER(ct.c_double), ct.POINTER(ct.c_double)]
 lib.copy_weights.restype = None
 
+# system info functions
+lib.get_system_info.argtypes = []
+lib.get_system_info.restype = ct.c_char_p
+lib.get_gpu_info.argtypes = []
+lib.get_gpu_info.restype = ct.c_char_p
+
 def np_ptr(arr: np.ndarray):
     return arr.ctypes.data_as(ct.POINTER(ct.c_double))
 
@@ -48,9 +55,24 @@ if __name__ == "__main__":
     print("ReLU inplace:", x)
 
     z = np.array([1.0, 2.0, 3.0], dtype=np.float64)
-    out_buf = (ct.c_char * 64)()
-    lib.softmax_to_fixedbuf(np_ptr(z), z.size, ct.cast(out_buf, ct.c_char_p))
+    out_buf = (ct.c_char * 256)()
+    lib.softmax_to_fixedbuf(np_ptr(z), z.size, ct.cast(out_buf, ct.c_char_p), ct.c_size_t(len(out_buf)))
     print("softmax:", bytes(out_buf).partition(b'\x00')[0].decode(errors='replace'))
+
+    # system info (returns malloc'ed pointer, free with c_free_model)
+    s = lib.get_system_info()
+    if s:
+        print("system:", s.decode() if isinstance(s, bytes) else s)
+        lib.c_free_model(s)
+    else:
+        print("system info unavailable")
+
+    g = lib.get_gpu_info()
+    if g:
+        print("gpu:", g.decode() if isinstance(g, bytes) else g)
+        lib.c_free_model(g)
+    else:
+        print("gpu info unavailable")
 
     basepath = b"." 
     weights = np.array([0.1, 0.2, 0.3, 0.4], dtype=np.float64)
