@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.security.api_key import APIKeyHeader
 from slowapi.util import get_remote_address
@@ -51,9 +52,9 @@ app.add_middleware(
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggerMiddleware)
 
-app.include_router(post_routes.router)
-app.include_router(get_routes.router)
-app.include_router(auth_routes.router, prefix="/auth",tags=["auth"])
+app.include_router(routes.post.router)
+app.include_router(routes.get.router)
+app.include_router(routes.auth.router, prefix="/auth",tags=["auth"])
 
 try:
     bullshit.stupid_test()
