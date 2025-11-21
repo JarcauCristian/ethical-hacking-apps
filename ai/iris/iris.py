@@ -80,7 +80,6 @@ def add_data(item: IrisData):
     }
 
 
-
 @app.post("/train")
 def train_model():
     """Train a Random Forest on Iris + user data."""
