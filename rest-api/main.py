@@ -1,16 +1,19 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
-from fastapi.security.api_key import APIKeyHeader
-import get_routes
-import post_routes
-import bullshit
-import uvicorn
 import os
+
+from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.security.api_key import APIKeyHeader
 from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
-from fastapi.security.api_key import APIKeyHeader
-from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
-from limiter_inst import limiter
-import auth_routes
+import uvicorn
+
+import routes.auth
+import routes.post
+import routes.get
+from middlewares.logging import RequestLoggerMiddleware
+from middlewares.headers import SecurityHeadersMiddleware
+from database import init_db
+from state import limiter
 
 API_KEY = os.getenv("SECRET_KEY", "supersecretkey123")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
