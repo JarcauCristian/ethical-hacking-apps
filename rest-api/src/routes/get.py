@@ -1,23 +1,20 @@
-
+from fastapi.routing import APIRouter
+from fastapi import Query, HTTPException, Request, Depends
+from fastapi.responses import FileResponse, PlainTextResponse
+from file_operations import validate, validate_user_file, get_user_folder
 import base64
 import aiofiles
 import json
 from typing import Optional
-
-from fastapi.routing import APIRouter
-from fastapi import Query, HTTPException, Request, Depends
-from fastapi.responses import FileResponse, PlainTextResponse
-
-from authentication.jwt import get_current_user_id, user_key
-from file_operations import validate_user_file, get_user_folder
-from state import limiter
+from auth_routes import get_current_user_id
+from post_routes import user_key
+from limiter_inst import limiter
 
 router = APIRouter()
 
 def _read_b64_sync(path: str):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
-
 
 async def _read_b64_async(path: str):
     async with aiofiles.open(path, "rb") as fp:
@@ -30,8 +27,9 @@ async def _get_file(
     request: Request, 
     user_id: str = Depends(get_current_user_id),
     path: str = Query(..., description="Path to the file"), 
-    mode: Optional[str] = Query("base64", description="Mode: 'base64' for content or 'download' for file download"),
+    mode: Optional[str] = Query("base64", description="Mode: 'base64' for content or 'download' for file download")
 ):
+    
     if path is None or str(path).strip() == "":
         raise HTTPException(status_code=400, detail="Path should not be None or empty.")
 
@@ -58,4 +56,3 @@ async def _get_file(
     }
 
     return PlainTextResponse(json.dumps(response), media_type="application/json")
-
