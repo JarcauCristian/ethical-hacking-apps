@@ -6,9 +6,8 @@ import base64
 import aiofiles
 import json
 from typing import Optional
-from auth_routes import get_current_user_id
-from post_routes import user_key
-from limiter_inst import limiter
+from authentication.jwt import user_key, get_current_user_id
+from state import limiter
 
 router = APIRouter()
 
